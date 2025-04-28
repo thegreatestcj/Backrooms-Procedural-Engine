@@ -1,0 +1,46 @@
+# Ignore build directories
+build/
+Build/
+bin/
+cmake-build-debug/
+
+# Ignore temporary files
+*.obj
+*.o
+*.so
+*.dll
+*.exe
+*.out
+*.log
+
+# Ignore CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore Visual Studio files
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.user
+*.opensdf
+*.sdf
+*.db
+*.ipch
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore ImGui demo executable
+imgui_demo.cpp~
+
+# Ignore any VSCode settings (if you use VSCode)
+.vscode/
+
+# Ignore CLion or JetBrains IDE configs
+.idea/
+
+# Ignore compiled resources
+resources/*.bin
+resources/*.cache
