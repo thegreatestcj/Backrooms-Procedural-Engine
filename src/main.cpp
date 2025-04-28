@@ -1,8 +1,3 @@
-//
-// Created by saki on 4/27/25.
-//
-// src/main.cpp
-
 #include <../external/glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -21,14 +16,12 @@
 #include <vector>
 #include <memory>
 
-// Cross-platform header for changing working directory
 #ifdef _WIN32
-#include <direct.h> // For Windows _chdir()
+#include <direct.h>
 #else
-#include <unistd.h> // For Linux, WSL, and macOS chdir()
+#include <unistd.h>
 #endif
 
-// Change current working directory to project root
 void SetWorkingDirectoryToProjectRoot()
 {
 #ifdef _WIN32
@@ -46,7 +39,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 int main()
 {
     SetWorkingDirectoryToProjectRoot();
-    // Initialize GLFW
     if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW\n";
@@ -85,46 +77,56 @@ int main()
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
     ImGui::StyleColorsDark();
-
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // Load Shader
+    // Load shaders
     Shader wallpaperShader("DefaultWallpaper.vert", "DefaultWallpaper.frag");
+    Shader floorShader("DefaultFloor.vert", "DefaultFloor.frag");
+    Shader ceilingShader("DefaultCeiling.vert", "DefaultCeiling.frag");
 
-    // Create Plane Mesh
+    // Create plane mesh
     Mesh planeMesh = CreatePlaneMesh(50.0f, 50.0f, 4.0f);
 
-    // Create Objects
+    // Create scene objects
     std::vector<std::shared_ptr<Object>> sceneObjects;
 
-    // Floor
     auto floor = std::make_shared<Object>();
     floor->AddComponent<MeshComponent>(planeMesh);
-    floor->AddComponent<MaterialComponent>(Material(&wallpaperShader));
+    floor->AddComponent<MaterialComponent>(Material(&floorShader));
+    floor->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f)); // Rotate onto XZ plane
     sceneObjects.push_back(floor);
 
-    // Ceiling
     auto ceiling = std::make_shared<Object>();
     ceiling->AddComponent<MeshComponent>(planeMesh);
-    ceiling->AddComponent<MaterialComponent>(Material(&wallpaperShader));
+    ceiling->AddComponent<MaterialComponent>(Material(&ceilingShader));
+    ceiling->SetPosition(glm::vec3(0.0f, 5.0f, 0.0f));
+    ceiling->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
     sceneObjects.push_back(ceiling);
 
-    // Walls (Front, Back, Left, Right)
+    glm::vec3 wallPositions[4] = {
+        glm::vec3(0, 2.5f, -25),
+        glm::vec3(0, 2.5f, 25),
+        glm::vec3(-25, 2.5f, 0),
+        glm::vec3(25, 2.5f, 0)
+    };
+    float wallRotationsY[4] = { 0.0f, 180.0f, 90.0f, -90.0f };
+
     for (int i = 0; i < 4; ++i)
     {
         auto wall = std::make_shared<Object>();
         wall->AddComponent<MeshComponent>(planeMesh);
         wall->AddComponent<MaterialComponent>(Material(&wallpaperShader));
+        wall->SetPosition(wallPositions[i]);
+        wall->SetRotation(glm::vec3(0, wallRotationsY[i], 0));
         sceneObjects.push_back(wall);
     }
 
-    // Camera
+    // Create camera
     Camera camera(glm::vec3(0.0f, 2.0f, 5.0f));
-
-    // Timing
     float lastFrame = 0.0f;
 
+    // Main loop
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -132,67 +134,26 @@ int main()
         lastFrame = currentFrame;
 
         glfwPollEvents();
-
         camera.ProcessKeyboard(window, deltaTime);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Camera ImGui
         camera.DrawImGui();
 
-        // Clear Screen
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Setup camera matrices
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)display_w / (float)display_h, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
 
-        wallpaperShader.use();
-        wallpaperShader.setMat4("projection", projection);
-        wallpaperShader.setMat4("view", view);
-        wallpaperShader.setVec3("lightPos", glm::vec3(10.0f, 10.0f, 10.0f));
-        wallpaperShader.setVec3("viewPos", camera.Position);
-
-        // Transformations
-        glm::mat4 model(1.0f);
-
-        // Floor
-        model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
-        floor->components[0]->Render();
-
-        // Ceiling
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0, 5.0f, 0));
-        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
-        ceiling->components[0]->Render();
-
-        // Walls
-        glm::vec3 wallPositions[] = {
-            glm::vec3(0, 2.5f, -25),
-            glm::vec3(0, 2.5f, 25),
-            glm::vec3(-25, 2.5f, 0),
-            glm::vec3(25, 2.5f, 0)
-        };
-        glm::vec3 wallRotations[] = {
-            glm::vec3(0, 0, 0),
-            glm::vec3(0, 180, 0),
-            glm::vec3(0, 90, 0),
-            glm::vec3(0, -90, 0)
-        };
-
-        for (int i = 2; i < 6; ++i)
+        for (auto& obj : sceneObjects)
         {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, wallPositions[i-2]);
-            model = glm::rotate(model, glm::radians(wallRotations[i-2].y), glm::vec3(0, 1, 0));
-            sceneObjects[i]->components[0]->Render();
+            obj->Render(projection, view, camera.Position);
         }
 
         ImGui::Render();

@@ -34,6 +34,10 @@ Makefile
 
 # Ignore ImGui demo executable
 imgui_demo.cpp~
+imgui.ini
+
+# Ignore Renderdoc local captures
+renderdoc/captures
 
 # Ignore any VSCode settings (if you use VSCode)
 .vscode/
