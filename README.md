@@ -3,7 +3,7 @@
 [English](README.md) | [🇨🇳 中文版](README.zh-CN.md)
 
 ## Introduction
-Welcome to the Procedural Backrooms Engine!  
+Welcome to the Backrooms!  
 This project is a real-time procedural 3D engine written in **C++ & OpenGL**, designed for procedural generation of endless Backrooms-style environments.
 
 ✨ **Main Features:**
