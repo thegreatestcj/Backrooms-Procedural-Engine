@@ -11,4 +11,9 @@ public:
 
     MaterialComponent(Object* owner, const Material& mat)
         : Component(owner), material(mat) {}
+
+    void Render() override
+    {
+        material.Use();
+    }
 };

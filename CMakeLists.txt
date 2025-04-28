@@ -22,11 +22,14 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/external/glad
         ${CMAKE_SOURCE_DIR}/external/imgui
         ${CMAKE_SOURCE_DIR}/external/imgui/backends
+        ${CMAKE_SOURCE_DIR}/external/stb
 )
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
         src/*.cpp
+        src/core/*.cpp
+        src/utilities/*.cpp
 )
 
 # ImGui core source files
@@ -49,19 +52,27 @@ file(GLOB GLAD_FILES
         external/glad/*.c
 )
 
+file(GLOB STB_FILES
+        external/stb/*.cpp
+)
+
 # Combine all sources
 set(ALL_SOURCES
         ${SRC_FILES}
         ${IMGUI_CORE_FILES}
         ${IMGUI_BACKEND_FILES}
         ${GLAD_FILES}
+        ${STB_FILES}
 )
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
 
 # Create executable
-add_executable(${PROJECT_NAME} ${ALL_SOURCES})
+add_executable(BackroomsProceduralEngine
+        src/main.cpp
+        ${ALL_SOURCES}
+)
 
 # Set different output directories for Debug and Release
 set_target_properties(${PROJECT_NAME} PROPERTIES
