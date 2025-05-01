@@ -15,3 +15,5 @@ void main()
     vec3 baseColor = mix(vec3(0.25, 0.22, 0.18), vec3(0.3, 0.28, 0.23), noise); // Dark brown carpet colors
     FragColor = vec4(baseColor, 1.0);
 }
+
+

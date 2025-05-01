@@ -16,4 +16,6 @@ public:
     {
         material.Use();
     }
+
+    void DrawImGui() override;
 };

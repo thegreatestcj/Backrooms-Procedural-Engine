@@ -13,4 +13,5 @@ public:
 
     virtual void Update(float deltaTime) {} // logic component
     virtual void Render() {}                // mesh component
+    virtual void DrawImGui() {}
 };
