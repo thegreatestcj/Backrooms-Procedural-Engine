@@ -2,6 +2,7 @@
 #include "core/Mesh.h"
 
 #include <glad/glad.h>
+#include <iostream>
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     : vertices(vertices), indices(indices)
@@ -48,7 +49,14 @@ void Mesh::setupMesh()
 
 void Mesh::Draw() const
 {
+    if (VAO == 0 || indices.empty())
+    {
+        std::cerr << "Draw skipped: VAO == 0 or indices empty.\n";
+        return;
+    }
+
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
